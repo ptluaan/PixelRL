@@ -135,10 +135,12 @@ def main():
         # load images
         r = indices[i:i+TRAIN_BATCH_SIZE]
         raw_x = mini_batch_loader.load_training_data(r)
+        print("loaded image")
         # generate noise
         # raw_n = np.random.normal(MEAN,SIGMA,raw_x.shape).astype(raw_x.dtype)/255
         # initialize the current state and reward
         current_state.reset(raw_x)
+        print('ok pca')
         reward = np.zeros(raw_x.shape, raw_x.dtype)
         sum_reward = 0
         
