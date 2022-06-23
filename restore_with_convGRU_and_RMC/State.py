@@ -11,6 +11,7 @@ class State():
     def reset(self, x):
         # self.image = x+n
         size = x.shape
+        print(size)
         for i in range(size[0]) :
             for j in range(size[1]) :
                 pca = PCA(size[3]//10).fit(x[i][j])

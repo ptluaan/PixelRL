@@ -1,1 +1,0 @@
-salt_pepper_noise_50_30000.npz, which was trained on salt&pepper denoising with 50% noise ratio, is used as the initial weights.
