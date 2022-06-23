@@ -198,5 +198,7 @@ if __name__ == '__main__':
         print("{s}[m]".format(s=(end - start)/60))
         print("{s}[h]".format(s=(end - start)/60/60))
 
-    except Exception as error:
-        print(error.message)
+    # except Exception as error:
+    except :
+        print("error")
+        # print(error.message)
