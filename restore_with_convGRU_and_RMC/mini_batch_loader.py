@@ -98,7 +98,7 @@ class MiniBatchLoader(object):
                 else :
                     path.replace('train', 'train_pca')
 
-                img_text = self.load_suport(path)
+                img_text = self.load_support(path)
 
                 xs[i, 0, :, :] = (img/255).astype(np.float32)
                 xs_text[i, 0, :, :] = (img_text/255).astype(np.float32)
