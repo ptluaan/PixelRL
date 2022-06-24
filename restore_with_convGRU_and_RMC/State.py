@@ -17,7 +17,7 @@ class State():
             print(i, size[3]//10)
             pca = PCA(size[3]//10).fit(x[i][0])
             x_pca = pca.transform(x[i][0])
-            x_pca = pca.inverse_transform(x[i][0])
+            x_pca = pca.inverse_transform(x_pca)
             x[i][0] = x_pca
         
         self.image = x
