@@ -91,7 +91,7 @@ class MiniBatchLoader(object):
             for i, index in enumerate(indices):
                 path = path_infos[index]
                 
-                img = self.load_suport(path)
+                img = self.load_support(path)
 
                 if path.find('test') > -1 :
                     path.replace('test','test_pca')
