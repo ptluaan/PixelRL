@@ -137,7 +137,7 @@ def main():
         sum_reward = 0
         
         for t in range(0, EPISODE_LEN):
-            print('\t',t)
+            # print('\t',t)
             previous_image = current_state.image.copy()
             action, inner_state = agent.act_and_train(current_state.tensor, reward)
             current_state.step(action, inner_state)
