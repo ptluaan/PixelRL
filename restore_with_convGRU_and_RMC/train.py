@@ -33,7 +33,7 @@ LEARNING_RATE    = 0.001
 TRAIN_BATCH_SIZE = FLAGS.batch_size 
 TEST_BATCH_SIZE  = 1 #must be 1
 N_EPISODES           = FLAGS.episodes 
-EPISODE_LEN = 50
+EPISODE_LEN = 20
 SNAPSHOT_EPISODES  = FLAGS.snapshot_episodes 
 TEST_EPISODES = FLAGS.test_episodes 
 GAMMA = 0.95 # discount factor
@@ -145,6 +145,7 @@ def main():
         sum_reward = 0
         
         for t in range(0, EPISODE_LEN):
+            print(t)
             previous_image = current_state.image.copy()
             action, inner_state = agent.act_and_train(current_state.tensor, reward)
             current_state.step(action, inner_state)
