@@ -151,7 +151,7 @@ def main():
             current_state.step(action, inner_state)
             reward = np.square(raw_x - previous_image)*255 - np.square(raw_x - current_state.image)*255
             sum_reward += np.mean(reward)*np.power(GAMMA,t)
-
+        print("ok time step")
         agent.stop_episode_and_train(current_state.tensor, reward, True)
         print("train total reward {:0.4f}".format(sum_reward*255))
 
