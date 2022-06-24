@@ -6,6 +6,7 @@ import chainer
 import State
 import time
 import os
+# import _pickle as pickle
 # from chainer import serializers
 # from chainer import cuda, optimizers, Variable
 # import sys
@@ -21,11 +22,11 @@ parser.add_argument("--ckpt_path", type=str, default="./checkpoint", help="-")
 
 FLAGS, unparsed = parser.parse_known_args()
 
+
 #_/_/_/ paths _/_/_/ 
 TRAINING_DATA_PATH          = "../training_BSD68.txt"
 TESTING_DATA_PATH           = "../testing_BSD68.txt"
 IMAGE_DIR_PATH              = "../"
-# CKPT_PATH            = "./checkpoint"
 CKPT_PATH            = FLAGS.ckpt_path
  
 #_/_/_/ training parameters _/_/_/ 
@@ -33,17 +34,13 @@ LEARNING_RATE    = 0.001
 TRAIN_BATCH_SIZE = FLAGS.batch_size 
 TEST_BATCH_SIZE  = 1 #must be 1
 N_EPISODES           = FLAGS.episodes 
-EPISODE_LEN = 10
+EPISODE_LEN = 15
 SNAPSHOT_EPISODES  = FLAGS.snapshot_episodes 
 TEST_EPISODES = FLAGS.test_episodes 
 GAMMA = 0.95 # discount factor
 
-# #noise setting
-# MEAN = 0
-# SIGMA = 15
-
 N_ACTIONS = 9
-MOVE_RANGE = 3 #number of actions that move the pixel values. e.g., when MOVE_RANGE=3, there are three actions: pixel_value+=1, +=0, -=1.
+MOVE_RANGE = 3
 CROP_SIZE = 70
 
 GPU_ID = 0
@@ -54,10 +51,8 @@ def test(loader, agent):
     test_data_size = MiniBatchLoader.count_paths(TESTING_DATA_PATH)
     current_state = State.State((TEST_BATCH_SIZE,1,CROP_SIZE,CROP_SIZE), MOVE_RANGE)
     for i in range(0, test_data_size, TEST_BATCH_SIZE):
-        raw_x = loader.load_testing_data(np.array(range(i, i+TEST_BATCH_SIZE)))
-        # raw_n = np.random.normal(MEAN,SIGMA,raw_x.shape).astype(raw_x.dtype)/255
-        # current_state.reset(raw_x,raw_n)
-        current_state.reset(raw_x)
+        raw_x, raw_xt = loader.load_testing_data(np.array(range(i, i+TEST_BATCH_SIZE)))
+        current_state.reset(raw_xt)
         reward = np.zeros(raw_x.shape, raw_x.dtype)*255
         
         for t in range(0, EPISODE_LEN):
@@ -81,7 +76,7 @@ def test(loader, agent):
     total_psnr = sum_psnr/test_data_size
     print("test total reward {:0.4f}, PSNR {:0.4f}".format(total_reward, total_psnr))
     return total_reward, total_psnr
- 
+    
  
 def main():
     REWARD_LOG = []
@@ -91,7 +86,7 @@ def main():
     PSNR_LOG = []
     if os.path.exists(f"{CKPT_PATH}/psnr_log.npy"):
         PSNR_LOG = np.load(f"{CKPT_PATH}/psnr_log.npy").tolist()
-    
+
     CUR_EPISODE = 0
     if os.path.exists(f"{CKPT_PATH}/current_episode.npy"):
         CUR_EPISODE = np.load(f"{CKPT_PATH}/current_episode.npy")
@@ -114,16 +109,19 @@ def main():
         chainer.serializers.load_npz(f"{CKPT_PATH}/model.npz", model)
 
     #_/_/_/ setup _/_/_/
+ 
     optimizer = chainer.optimizers.Adam(alpha=LEARNING_RATE)
     optimizer.setup(model)
 
-    agent = PixelWiseA3C_InnerState_ConvR(model, optimizer, EPISODE_LEN, GAMMA)
+
+    agent = PixelWiseA3C_InnerState(model, optimizer, int(EPISODE_LEN/3), GAMMA)
     if os.path.exists(f"{CKPT_PATH}/optimizer.npz"):
         chainer.serializers.load_npz(f"{CKPT_PATH}/optimizer.npz", agent.optimizer)
     agent.act_deterministically = True
     agent.model.to_gpu()
     
     #_/_/_/ training _/_/_/
+ 
     train_data_size = MiniBatchLoader.count_paths(TRAINING_DATA_PATH)
     indices = np.random.permutation(train_data_size)
     i = 0
@@ -131,27 +129,21 @@ def main():
         # display current state
         episode = epi + CUR_EPISODE
         print("episode %d" % episode)
-        
-        # load images
+
         r = indices[i:i+TRAIN_BATCH_SIZE]
-        raw_x = mini_batch_loader.load_training_data(r)
-        print("loaded image")
-        # generate noise
-        # raw_n = np.random.normal(MEAN,SIGMA,raw_x.shape).astype(raw_x.dtype)/255
-        # initialize the current state and reward
-        current_state.reset(raw_x)
-        print('ok pca')
+        raw_x, raw_xt = mini_batch_loader.load_training_data(r)
+        current_state.reset(raw_xt)
         reward = np.zeros(raw_x.shape, raw_x.dtype)
         sum_reward = 0
         
         for t in range(0, EPISODE_LEN):
-            print(t)
+            print('\t',t)
             previous_image = current_state.image.copy()
             action, inner_state = agent.act_and_train(current_state.tensor, reward)
             current_state.step(action, inner_state)
             reward = np.square(raw_x - previous_image)*255 - np.square(raw_x - current_state.image)*255
             sum_reward += np.mean(reward)*np.power(GAMMA,t)
-        print("ok time step")
+        
         agent.stop_episode_and_train(current_state.tensor, reward, True)
         print("train total reward {:0.4f}".format(sum_reward*255))
 
@@ -182,14 +174,15 @@ def main():
 
         # optimizer.alpha = LEARNING_RATE*((1-episode/N_EPISODES)**0.9)
         optimizer.alpha = LEARNING_RATE*((1-episode/10000)**0.9)
-    
+ 
     REWARD_LOG = np.array(REWARD_LOG)
     PSNR_LOG = np.array(PSNR_LOG)
     CUR_EPISODE += epi
     CUR_EPISODE = np.int32(CUR_EPISODE)
-    np.save(f"{CKPT_PATH}/current_episode.npy", CUR_EPISODE)
+    np.save(f"{CKPT_PATH}/current_episode.npy", CUR_EPISODE)    
     np.save(f"{CKPT_PATH}/reward_log.npy", REWARD_LOG)
     np.save(f"{CKPT_PATH}/psnr_log.npy", PSNR_LOG)
+
      
  
 if __name__ == '__main__':
@@ -200,8 +193,6 @@ if __name__ == '__main__':
         print("{s}[s]".format(s=end - start))
         print("{s}[m]".format(s=(end - start)/60))
         print("{s}[h]".format(s=(end - start)/60/60))
-
-    # except Exception as error:
-    except :
-        print("error")
-        # print(error.message)
+        
+    except Exception as error:
+        print(error.message)

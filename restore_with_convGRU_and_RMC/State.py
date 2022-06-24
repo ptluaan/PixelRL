@@ -1,4 +1,3 @@
-from sklearn.decomposition import PCA
 import numpy as np
 import sys
 import cv2
@@ -9,25 +8,10 @@ class State():
         self.move_range = move_range
     
     def reset(self, x):
-        # self.image = x+n
-        size = x.shape
-        # print(size)
-        for i in range(size[0]) :
-            # for j in range(size[1]) :
-            # print(i, size[3]//10)
-            pca = PCA(size[3]//10).fit(x[i][0])
-            x_pca = pca.transform(x[i][0])
-            x_pca = pca.inverse_transform(x_pca)
-            x[i][0] = x_pca
-        
         self.image = x
-
+        size = self.image.shape
         prev_state = np.zeros((size[0],64,size[2],size[3]),dtype=np.float32)
         self.tensor = np.concatenate((self.image, prev_state), axis=1)
-        # self.image = x+n
-        # size = self.image.shape
-        # prev_state = np.zeros((size[0],64,size[2],size[3]),dtype=np.float32)
-        # self.tensor = np.concatenate((self.image, prev_state), axis=1)
 
     def set(self, x):
         self.image = x
@@ -73,3 +57,13 @@ class State():
 
         self.tensor[:,:self.image.shape[1],:,:] = self.image
         self.tensor[:,-64:,:,:] = inner_state
+
+    
+class RandomActor:
+    def __init__(self, state):
+        self.state = state
+        #self.random_count = 0
+
+    def random_action_func(self):
+        #self.random_count += 1
+        return self.state.random_action()

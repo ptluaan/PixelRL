@@ -45,7 +45,7 @@ def mylog_prob(self, x):
     return F.reshape(selected_p, (n_batch,1,h,w))
 ##########################
 
-class PixelWiseA3C_InnerState_ConvR(agent.AttributeSavingMixin, agent.AsyncAgent):
+class PixelWiseA3C_InnerState(agent.AttributeSavingMixin, agent.AsyncAgent):
     """A3C: Asynchronous Advantage Actor-Critic.
 
     See http://arxiv.org/abs/1602.01783
