@@ -16,8 +16,9 @@ class State():
             # for j in range(size[1]) :
             print(i, size[3]//10)
             pca = PCA(size[3]//10).fit(x[i][0])
-            x[i][0] = pca.transform(x[i][0])
-            x[i][0] = pca.inverse_transform(x[i][0])
+            x_pca = pca.transform(x[i][0])
+            x_pca = pca.inverse_transform(x[i][0])
+            x[i][0] = x_pca
         
         self.image = x
 
