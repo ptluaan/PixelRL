@@ -45,8 +45,9 @@ def test(loader, agent):
     current_state = State.State((TEST_BATCH_SIZE,1,CROP_SIZE,CROP_SIZE), MOVE_RANGE)
     for i in range(0, test_data_size, TEST_BATCH_SIZE):
         raw_x = loader.load_testing_data(np.array(range(i, i+TEST_BATCH_SIZE)))
-        raw_n = np.random.normal(MEAN,SIGMA,raw_x.shape).astype(raw_x.dtype)/255
-        current_state.reset(raw_x,raw_n)
+        # raw_n = np.random.normal(MEAN,SIGMA,raw_x.shape).astype(raw_x.dtype)/255
+        # current_state.reset(raw_x,raw_n)
+        current_state.reset(raw_x)
         reward = np.zeros(raw_x.shape, raw_x.dtype)*255
         
         for t in range(0, EPISODE_LEN):
@@ -60,7 +61,8 @@ def test(loader, agent):
             
         I = np.maximum(0,raw_x)
         I = np.minimum(1,I)
-        N = np.maximum(0,raw_x+raw_n)
+        N = np.maximum(0,raw_x)
+        # N = np.maximum(0,raw_x+raw_n)
         N = np.minimum(1,N)
         p = np.maximum(0,current_state.image)
         p = np.minimum(1,p)
