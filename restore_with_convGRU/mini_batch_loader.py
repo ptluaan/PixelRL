@@ -99,8 +99,8 @@ class MiniBatchLoader(object):
                 rand_range_w = w-self.crop_size
                 x_offset = np.random.randint(rand_range_w)
                 y_offset = np.random.randint(rand_range_h)
-                img = img[y_offset:y_offset+self.crop_size, x_offset:x_offset+self.crop_size, :]
-                src_img = src_img[y_offset:y_offset+self.crop_size, x_offset:x_offset+self.crop_size, :]
+                img = img[y_offset:y_offset+self.crop_size, x_offset:x_offset+self.crop_size]
+                src_img = src_img[y_offset:y_offset+self.crop_size, x_offset:x_offset+self.crop_size]
                 img = (img/255).astype(np.float32)
                 src_img = (src_img/255).astype(np.float32)
 
