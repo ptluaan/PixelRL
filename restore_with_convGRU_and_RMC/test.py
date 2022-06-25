@@ -26,7 +26,7 @@ SAVE_PATH            = "./resultimage"
 #_/_/_/ training parameters _/_/_/ 
 LEARNING_RATE    = 0.001
 TEST_BATCH_SIZE  = 1 #must be 1
-EPISODE_LEN = 20
+EPISODE_LEN = 100
 GAMMA = 0.95 # discount factor
 
 N_ACTIONS = 9

@@ -72,7 +72,7 @@ class MiniBatchLoader(object):
                 
                 if src_img_path.find('test') > -1 :
                     src_img_path.replace('test','test_pca')
-                else :
+                elif src_img_path.find('train') > -1:
                     src_img_path.replace('train', 'train_pca')
                 
                 src_img = cv2.imread(src_img_path,0)
