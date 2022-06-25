@@ -66,15 +66,17 @@ class MiniBatchLoader(object):
             for i, index in enumerate(indices):
               
                 img_path = path_infos[index]
-                src_img_path = img_path.copy()
+                img = cv2.imread(img_path,0)
+                
+                src_img_path = img_path
                 
                 if src_img_path.find('test') > -1 :
                     src_img_path.replace('test','test_pca')
                 else :
                     src_img_path.replace('train', 'train_pca')
                 
-                img = cv2.imread(img_path,0)
                 src_img = cv2.imread(src_img_path,0)
+                
                 if img is None or src_img is None:
                     raise RuntimeError("invalid image: {i}, {j}".format(i=img_path,j=src_img_path))
                 #if img.shape != src_img.shape:
