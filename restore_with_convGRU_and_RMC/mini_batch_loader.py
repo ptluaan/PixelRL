@@ -54,32 +54,7 @@ class MiniBatchLoader(object):
     def load_testing_data(self, indices):
         return self.load_data(self.testing_path_infos, indices)
  
-    # test ok
-    def load_support(self, path): 
-        
-        img = cv2.imread(path,0)
-        if img is None:
-            raise RuntimeError("invalid image: {i}".format(i=path))
-        h, w = img.shape
-
-        if np.random.rand() > 0.5:
-            img = np.fliplr(img)
-
-        if np.random.rand() > 0.5:
-            angle = 10*np.random.rand()
-            if np.random.rand() > 0.5:
-                angle *= -1
-            M = cv2.getRotationMatrix2D((w/2,h/2),angle,1)
-            img = cv2.warpAffine(img,M,(w,h))
-
-        rand_range_h = h-self.crop_size
-        rand_range_w = w-self.crop_size
-        x_offset = np.random.randint(rand_range_w)
-        y_offset = np.random.randint(rand_range_h)
-        
-        return img[y_offset:y_offset+self.crop_size, x_offset:x_offset+self.crop_size]
-         
-
+    # test ok  
     def load_data(self, path_infos, indices, augment=False):
         mini_batch_size = len(indices)
         in_channels = 1
@@ -89,72 +64,46 @@ class MiniBatchLoader(object):
             xs_text = np.zeros((mini_batch_size, in_channels, self.crop_size, self.crop_size)).astype(np.float32)
             
             for i, index in enumerate(indices):
-                path = path_infos[index]
+              
+                img_path = path_infos[index]
+                src_img_path = img_path.copy()
                 
-                img = self.load_support(path)
-
-                if path.find('test') > -1 :
-                    path.replace('test','test_pca')
+                if src_img_path.find('test') > -1 :
+                    src_img_path.replace('test','test_pca')
                 else :
-                    path.replace('train', 'train_pca')
+                    src_img_path.replace('train', 'train_pca')
+                
+                img = cv2.imread(img_path,0)
+                src_img = cv2.imread(src_img_path,0)
+                if img is None or src_img is None:
+                    raise RuntimeError("invalid image: {i}, {j}".format(i=img_path,j=src_img_path))
+                #if img.shape != src_img.shape:
+                #    raise RuntimeError("invalid image: {i}:{n}, {j}:{m}".format(i=img_path,n=img.shape,j=src_img_path,m=src_img.shape))
+                h, w = img.shape
 
-                img_text = self.load_support(path)
+                if np.random.rand() > 0.5:
+                    img = np.fliplr(img)
+                    src_img = np.fliplr(src_img)
+
+                if np.random.rand() > 0.5:
+                    angle = 45*np.random.rand()
+                    if np.random.rand() > 0.5:
+                        angle *= -1
+                    M = cv2.getRotationMatrix2D((w/2,h/2),angle,1)
+                    img = cv2.warpAffine(img,M,(w,h))
+                    src_img = cv2.warpAffine(src_img,M,(w,h))
+
+                rand_range_h = h-self.crop_size
+                rand_range_w = w-self.crop_size
+                x_offset = np.random.randint(rand_range_w)
+                y_offset = np.random.randint(rand_range_h)
+                img = img[y_offset:y_offset+self.crop_size, x_offset:x_offset+self.crop_size, :]
+                src_img = src_img[y_offset:y_offset+self.crop_size, x_offset:x_offset+self.crop_size, :]
+                img = (img/255).astype(np.float32)
+                src_img = (src_img/255).astype(np.float32)
 
                 xs[i, 0, :, :] = (img/255).astype(np.float32)
-                xs_text[i, 0, :, :] = (img_text/255).astype(np.float32)
-                # img = cv2.imread(path,0)
-                # if img is None:
-                #     raise RuntimeError("invalid image: {i}".format(i=path))
-                # h, w = img.shape
-
-                # if np.random.rand() > 0.5:
-                #     img = np.fliplr(img)
-
-                # if np.random.rand() > 0.5:
-                #     angle = 10*np.random.rand()
-                #     if np.random.rand() > 0.5:
-                #         angle *= -1
-                #     M = cv2.getRotationMatrix2D((w/2,h/2),angle,1)
-                #     img = cv2.warpAffine(img,M,(w,h))
-
-                # rand_range_h = h-self.crop_size
-                # rand_range_w = w-self.crop_size
-                # x_offset = np.random.randint(rand_range_w)
-                # y_offset = np.random.randint(rand_range_h)
-                # img = img[y_offset:y_offset+self.crop_size, x_offset:x_offset+self.crop_size]
-                # xs[i, 0, :, :] = (img/255).astype(np.float32)
-
-                # if np.random.rand() > 0.5:
-                #     text_value = 255
-                # else:
-                #     text_value = 0
-                # img_text = Image.fromarray(img)
-                # mask_id = np.random.randint(0,self.num_mask)
-                # mask = cv2.imread('../trainmask/'+str(mask_id)+'.png', 0)
-                # h, w = mask.shape
-                # if np.random.rand() > 0.5:
-                #     mask = np.fliplr(mask)
-
-                # if np.random.rand() > 0.5:
-                #     angle = 10*np.random.rand()
-                #     if np.random.rand() > 0.5:
-                #         angle *= -1
-                #     M = cv2.getRotationMatrix2D((w/2,h/2),angle,1)
-                #     mask = cv2.warpAffine(mask,M,(w,h))
-
-                # rand_range_h = h-self.crop_size
-                # rand_range_w = w-self.crop_size
-                # x_offset = np.random.randint(rand_range_w)
-                # y_offset = np.random.randint(rand_range_h)
-                # mask = mask[y_offset:y_offset+self.crop_size, x_offset:x_offset+self.crop_size]
-                # mask = Image.fromarray(mask)
-                # img_text.paste(text_value, mask)
-                # img_text = np.array(img_text)
-                # xs_text[i, 0, :, :] = (img_text/255).astype(np.float32)
-
-                #cv2.imshow('', img_text)
-                #cv2.waitKey(0)
-                #cv2.destroyAllWindows()
+                xs_text[i, 0, :, :] = (src_img/255).astype(np.float32)
 
         elif mini_batch_size == 1:
             for i, index in enumerate(indices):
