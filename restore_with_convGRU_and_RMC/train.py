@@ -59,7 +59,7 @@ def test(loader, agent):
             previous_image = current_state.image.copy()
             action, inner_state = agent.act(current_state.tensor)
             current_state.step(action, inner_state)
-            reward = np.square(raw_x - previous_image)*255 - np.square(raw_x - current_state.image)*255
+            reward = np.square((raw_x - previous_image)*255) - np.square((raw_x - current_state.image)*255)
             sum_reward += np.mean(reward)*np.power(GAMMA,t)
 
         agent.stop_episode()
@@ -141,7 +141,7 @@ def main():
             previous_image = current_state.image.copy()
             action, inner_state = agent.act_and_train(current_state.tensor, reward)
             current_state.step(action, inner_state)
-            reward = np.square(raw_x - previous_image)*255 - np.square(raw_x - current_state.image)*255
+            reward = np.square((raw_x - previous_image)*255) - np.square((raw_x - current_state.image)*255)
             sum_reward += np.mean(reward)*np.power(GAMMA,t)
         
         agent.stop_episode_and_train(current_state.tensor, reward, True)
