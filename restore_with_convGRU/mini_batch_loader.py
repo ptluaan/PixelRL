@@ -72,7 +72,7 @@ class MiniBatchLoader(object):
                 
                 if src_img_path.find('test') > -1 :
                     src_img_path.replace('test','test_pca')
-                elif src_img_path.find('train') > -1:
+                else :
                     src_img_path.replace('train', 'train_pca')
                 
                 src_img = cv2.imread(src_img_path,0)
@@ -83,17 +83,17 @@ class MiniBatchLoader(object):
                 #    raise RuntimeError("invalid image: {i}:{n}, {j}:{m}".format(i=img_path,n=img.shape,j=src_img_path,m=src_img.shape))
                 h, w = img.shape
 
-                # if np.random.rand() > 0.5:
-                #     img = np.fliplr(img)
-                #     src_img = np.fliplr(src_img)
+                if np.random.rand() > 0.5:
+                    img = np.fliplr(img)
+                    src_img = np.fliplr(src_img)
 
-                # if np.random.rand() > 0.5:
-                #     angle = 45*np.random.rand()
-                #     if np.random.rand() > 0.5:
-                #         angle *= -1
-                #     M = cv2.getRotationMatrix2D((w/2,h/2),angle,1)
-                #     img = cv2.warpAffine(img,M,(w,h))
-                #     src_img = cv2.warpAffine(src_img,M,(w,h))
+                if np.random.rand() > 0.5:
+                    angle = 45*np.random.rand()
+                    if np.random.rand() > 0.5:
+                        angle *= -1
+                    M = cv2.getRotationMatrix2D((w/2,h/2),angle,1)
+                    img = cv2.warpAffine(img,M,(w,h))
+                    src_img = cv2.warpAffine(src_img,M,(w,h))
 
                 rand_range_h = h-self.crop_size
                 rand_range_w = w-self.crop_size

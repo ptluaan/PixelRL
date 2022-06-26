@@ -14,19 +14,31 @@ import os
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--ckpt_path", type=str, default="./checkpoint", help="-")
+parser.add_argument("--test_online", type=str, default="../testing_BSD68.txt", help="-")
+parser.add_argument("--result_online", type=str, default="./resultimage", help="-")
 FLAGS, unparsed = parser.parse_known_args()
 
 #_/_/_/ paths _/_/_/ 
-TRAINING_DATA_PATH          = "../training_BSD68.txt"
-TESTING_DATA_PATH           = "../testing_BSD68.txt"
-IMAGE_DIR_PATH              = "../"
-CKPT_PATH = FLAGS.ckpt_path
-SAVE_PATH            = "./resultimage"
+TRAINING_DATA_PATH = "../training_BSD68.txt"
+# TESTING_DATA_PATH           = "../testing_BSD68.txt"
+IMAGE_DIR_PATH     = "../"
+CKPT_PATH          = FLAGS.ckpt_path 
+TESTING_DATA_PATH  = FLAGS.test_online
+SAVE_PATH          = FLAGS.result_online
+
+# FLAGS, unparsed = parser.parse_known_args()
+
+# #_/_/_/ paths _/_/_/ 
+# TRAINING_DATA_PATH          = "../training_BSD68.txt"
+# TESTING_DATA_PATH           = "../testing_BSD68.txt"
+# IMAGE_DIR_PATH              = "../"
+# CKPT_PATH = FLAGS.ckpt_path
+# SAVE_PATH            = "./resultimage"
  
 #_/_/_/ training parameters _/_/_/ 
 LEARNING_RATE    = 0.001
 TEST_BATCH_SIZE  = 1 #must be 1
-EPISODE_LEN = 15
+EPISODE_LEN = 20
 GAMMA = 0.95 # discount factor
 
 N_ACTIONS = 9
@@ -49,7 +61,7 @@ def test(loader, agent):
             previous_image = current_state.image.copy()
             action, inner_state = agent.act(current_state.tensor)
             current_state.step(action, inner_state)
-            reward = np.square((raw_x - previous_image)*255) - np.square((raw_x - current_state.image)*255)
+            reward = np.square(raw_x - previous_image)*255 - np.square(raw_x - current_state.image)*255
             sum_reward += np.mean(reward)*np.power(GAMMA,t)
 
         agent.stop_episode()

@@ -34,7 +34,7 @@ LEARNING_RATE    = 0.001
 TRAIN_BATCH_SIZE = FLAGS.batch_size
 TEST_BATCH_SIZE  = 1 #must be 1
 N_EPISODES           = FLAGS.episodes 
-EPISODE_LEN = 15
+EPISODE_LEN = 20
 SNAPSHOT_EPISODES  = FLAGS.snapshot_episodes 
 TEST_EPISODES = FLAGS.test_episodes 
 GAMMA = 0.95 # discount factor
@@ -59,7 +59,7 @@ def test(loader, agent):
             previous_image = current_state.image.copy()
             action, inner_state = agent.act(current_state.tensor)
             current_state.step(action, inner_state)
-            reward = np.square((raw_x - previous_image)*255) - np.square((raw_x - current_state.image)*255)
+            reward = np.square(raw_x - previous_image)*255 - np.square(raw_x - current_state.image)*255
             sum_reward += np.mean(reward)*np.power(GAMMA,t)
 
         agent.stop_episode()
@@ -138,7 +138,7 @@ def main():
             previous_image = current_state.image.copy()
             action, inner_state = agent.act_and_train(current_state.tensor, reward)
             current_state.step(action, inner_state)
-            reward = np.square((raw_x - previous_image)*255) - np.square((raw_x - current_state.image)*255)
+            reward = np.square(raw_x - previous_image)*255 - np.square(raw_x - current_state.image)*255
             sum_reward += np.mean(reward)*np.power(GAMMA,t)
 
         agent.stop_episode_and_train(current_state.tensor, reward, True)
